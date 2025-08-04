@@ -52,6 +52,17 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				highlight: {
+					yellow: 'hsl(var(--highlight-yellow))',
+					green: 'hsl(var(--highlight-green))',
+					blue: 'hsl(var(--highlight-blue))',
+					pink: 'hsl(var(--highlight-pink))',
+					purple: 'hsl(var(--highlight-purple))'
+				},
+				bible: {
+					text: 'hsl(var(--bible-text))',
+					verse: 'hsl(var(--verse-number))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

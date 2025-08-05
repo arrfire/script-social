@@ -1,22 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSocialContent } from '@/hooks/useSocialContent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Bookmark, Highlighter, MessageSquare, Settings } from 'lucide-react';
+import { BookOpen, Bookmark, Highlighter, MessageSquare, Settings, Play } from 'lucide-react';
+import SocialMediaCard from './SocialMediaCard';
 
 // Sample Bible data - in a real app, this would come from your database or API
 const sampleBibleData = {
-  book: "John",
-  chapter: 3,
+  book: "Matthew",
+  chapter: 5,
   verses: [
-    { number: 1, text: "Now there was a Pharisee, a man named Nicodemus who was a member of the Jewish ruling council." },
-    { number: 2, text: "He came to Jesus at night and said, \"Rabbi, we know that you are a teacher who has come from God. For no one could perform the signs you are doing if God were not with him.\"" },
-    { number: 3, text: "Jesus replied, \"Very truly I tell you, no one can see the kingdom of God unless they are born again.\"" },
-    { number: 4, text: "\"How can someone be born when they are old?\" Nicodemus asked. \"Surely they cannot enter a second time into their mother's womb to be born!\"" },
-    { number: 5, text: "Jesus answered, \"Very truly I tell you, no one can enter the kingdom of God unless they are born of water and the Spirit." },
-    { number: 16, text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life." }
+    { number: 3, text: "Blessed are the poor in spirit, for theirs is the kingdom of heaven." },
+    { number: 4, text: "Blessed are those who mourn, for they will be comforted." },
+    { number: 5, text: "Blessed are the meek, for they will inherit the earth." },
+    { number: 6, text: "Blessed are those who hunger and thirst for righteousness, for they will be filled." },
+    { number: 7, text: "Blessed are the merciful, for they will be shown mercy." },
+    { number: 8, text: "Blessed are the pure in heart, for they will see God." },
+    { number: 9, text: "Blessed are the peacemakers, for they will be called children of God." },
+    { number: 10, text: "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven." },
+    { number: 11, text: "Blessed are you when people insult you, persecute you and falsely say all kinds of evil against you because of me." },
+    { number: 12, text: "Rejoice and be glad, because great is your reward in heaven, for in the same way they persecuted the prophets who were before you." }
   ]
 };
 
@@ -25,6 +31,7 @@ const BibleReader = () => {
   const [selectedTranslation, setSelectedTranslation] = useState('ESV');
   const [highlightColor, setHighlightColor] = useState('yellow');
   const [highlights, setHighlights] = useState<Set<number>>(new Set());
+  const { content: socialContent, loading: socialLoading } = useSocialContent(sampleBibleData.book, sampleBibleData.chapter);
 
   const handleHighlight = (verseNumber: number) => {
     const newHighlights = new Set(highlights);
@@ -176,15 +183,31 @@ const BibleReader = () => {
             </Card>
           )}
 
-          {/* Social Content Placeholder */}
+          {/* Social Media Content */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Related Content</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Play className="h-5 w-5" />
+                Related Content
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Social media integration will display related tweets and videos here.
-              </p>
+              {socialLoading ? (
+                <div className="space-y-3">
+                  <div className="h-20 bg-muted rounded animate-pulse" />
+                  <div className="h-20 bg-muted rounded animate-pulse" />
+                </div>
+              ) : socialContent.length > 0 ? (
+                <div className="space-y-3">
+                  {socialContent.map((item) => (
+                    <SocialMediaCard key={item.id} content={item} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No related social media content found for this chapter.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>

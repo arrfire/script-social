@@ -192,6 +192,83 @@ export type Database = {
         }
         Relationships: []
       }
+      social_media_bible_references: {
+        Row: {
+          book_name: string
+          chapter_number: number | null
+          content_id: string
+          created_at: string
+          id: string
+          reference_text: string
+          verse_end: number | null
+          verse_start: number | null
+        }
+        Insert: {
+          book_name: string
+          chapter_number?: number | null
+          content_id: string
+          created_at?: string
+          id?: string
+          reference_text: string
+          verse_end?: number | null
+          verse_start?: number | null
+        }
+        Update: {
+          book_name?: string
+          chapter_number?: number | null
+          content_id?: string
+          created_at?: string
+          id?: string
+          reference_text?: string
+          verse_end?: number | null
+          verse_start?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_media_bible_references_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_media_content: {
+        Row: {
+          author_handle: string | null
+          content_type: string
+          created_at: string
+          description: string | null
+          id: string
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          author_handle?: string | null
+          content_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          author_handle?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       user_bookmarks: {
         Row: {
           chapter_id: string

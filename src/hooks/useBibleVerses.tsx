@@ -16,42 +16,68 @@ export const useBibleVerses = (bookName?: string, chapterNumber?: number, transl
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!bookName || !chapterNumber) return;
+    if (!bookName || !chapterNumber) {
+      setVerses([]);
+      return;
+    }
 
     const fetchVerses = async () => {
       setLoading(true);
       try {
+        console.log(`Fetching verses for ${bookName} chapter ${chapterNumber}`);
+        
         // First get the book
-        const { data: book } = await supabase
+        const { data: book, error: bookError } = await supabase
           .from('bible_books')
           .select('id')
           .eq('name', bookName)
-          .single();
+          .maybeSingle();
 
-        if (!book) return;
+        if (bookError) {
+          console.error('Error fetching book:', bookError);
+          return;
+        }
+
+        if (!book) {
+          console.log(`Book not found: ${bookName}`);
+          return;
+        }
+
+        console.log(`Found book with ID: ${book.id}`);
 
         // Then get the chapter
-        const { data: chapter } = await supabase
+        const { data: chapter, error: chapterError } = await supabase
           .from('bible_chapters')
           .select('id')
           .eq('book_id', book.id)
           .eq('chapter_number', chapterNumber)
-          .single();
+          .maybeSingle();
 
-        if (!chapter) return;
+        if (chapterError) {
+          console.error('Error fetching chapter:', chapterError);
+          return;
+        }
+
+        if (!chapter) {
+          console.log(`Chapter not found: ${bookName} ${chapterNumber}`);
+          return;
+        }
+
+        console.log(`Found chapter with ID: ${chapter.id}`);
 
         // Finally get the verses
-        const { data: versesData, error } = await supabase
+        const { data: versesData, error: versesError } = await supabase
           .from('bible_verses')
           .select('id, verse_number, text_esv, text_niv, text_nasb, text_kjv')
           .eq('chapter_id', chapter.id)
           .order('verse_number');
 
-        if (error) {
-          console.error('Error fetching verses:', error);
+        if (versesError) {
+          console.error('Error fetching verses:', versesError);
           return;
         }
 
+        console.log(`Found ${versesData?.length || 0} verses`);
         setVerses(versesData || []);
       } catch (error) {
         console.error('Error fetching verses:', error);

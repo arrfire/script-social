@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -22,38 +23,51 @@ export const useSocialContent = (bookName?: string, chapterNumber?: number) => {
     const fetchRelatedContent = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('social_media_content')
-          .select(`
-            id,
-            content_type,
-            url,
-            title,
-            author_handle,
-            social_media_bible_references (
-              reference_text,
-              book_name,
-              chapter_number
-            )
-          `)
-          .eq('social_media_bible_references.book_name', bookName)
-          .eq('social_media_bible_references.chapter_number', chapterNumber);
+        // First get the bible references that match our book and chapter
+        const { data: references, error: referencesError } = await supabase
+          .from('social_media_bible_references')
+          .select('content_id, reference_text')
+          .eq('book_name', bookName)
+          .eq('chapter_number', chapterNumber);
 
-        if (error) {
-          console.error('Error fetching social content:', error);
+        if (referencesError) {
+          console.error('Error fetching bible references:', referencesError);
           return;
         }
 
-        const formattedContent = data?.map(item => ({
-          id: item.id,
-          content_type: item.content_type as 'youtube' | 'twitter',
-          url: item.url,
-          title: item.title || '',
-          author_handle: item.author_handle || '',
-          reference_text: item.social_media_bible_references?.[0]?.reference_text || '',
-          book_name: item.social_media_bible_references?.[0]?.book_name || '',
-          chapter_number: item.social_media_bible_references?.[0]?.chapter_number || 0,
-        })) || [];
+        if (!references || references.length === 0) {
+          setContent([]);
+          return;
+        }
+
+        // Get the content IDs
+        const contentIds = references.map(ref => ref.content_id);
+
+        // Now get the social media content for these IDs
+        const { data: socialContent, error: contentError } = await supabase
+          .from('social_media_content')
+          .select('id, content_type, url, title, author_handle')
+          .in('id', contentIds);
+
+        if (contentError) {
+          console.error('Error fetching social content:', contentError);
+          return;
+        }
+
+        // Combine the data
+        const formattedContent = socialContent?.map(item => {
+          const reference = references.find(ref => ref.content_id === item.id);
+          return {
+            id: item.id,
+            content_type: item.content_type as 'youtube' | 'twitter',
+            url: item.url,
+            title: item.title || '',
+            author_handle: item.author_handle || '',
+            reference_text: reference?.reference_text || '',
+            book_name: bookName,
+            chapter_number: chapterNumber,
+          };
+        }) || [];
 
         setContent(formattedContent);
       } catch (error) {

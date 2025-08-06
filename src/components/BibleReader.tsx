@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useChaptersWithContent } from '@/hooks/useChaptersWithContent';
@@ -11,7 +12,6 @@ const BibleReader = () => {
   const { user, signOut } = useAuth();
   const [selectedTranslation, setSelectedTranslation] = useState('ESV');
   const { chapters, loading } = useChaptersWithContent();
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,7 +52,7 @@ const BibleReader = () => {
           <CardHeader>
             <CardTitle className="text-2xl">Bible Chapters with Video Content</CardTitle>
             <p className="text-muted-foreground">
-              Explore Bible chapters that have related video content. Click on any chapter to view the videos.
+              Explore Bible chapters that have related video content. Click on any chapter to view the Bible text and related videos.
             </p>
           </CardHeader>
         </Card>
@@ -74,6 +74,7 @@ const BibleReader = () => {
               <BibleChapterWithVideos
                 key={`${chapter.book_name}-${chapter.chapter_number}`}
                 chapter={chapter}
+                selectedTranslation={selectedTranslation}
               />
             ))}
           </div>

@@ -1,10 +1,12 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Play } from 'lucide-react';
+import { ChevronDown, ChevronRight, Play, BookOpen } from 'lucide-react';
 import SocialMediaCard from './SocialMediaCard';
 import { useSocialContent } from '@/hooks/useSocialContent';
+import { useBibleVerses } from '@/hooks/useBibleVerses';
 
 interface ChapterData {
   book_name: string;
@@ -14,14 +16,29 @@ interface ChapterData {
 
 interface BibleChapterWithVideosProps {
   chapter: ChapterData;
+  selectedTranslation: string;
 }
 
-const BibleChapterWithVideos = ({ chapter }: BibleChapterWithVideosProps) => {
+const BibleChapterWithVideos = ({ chapter, selectedTranslation }: BibleChapterWithVideosProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { content: socialContent, loading } = useSocialContent(
+  const { content: socialContent, loading: socialLoading } = useSocialContent(
     isExpanded ? chapter.book_name : undefined, 
     isExpanded ? chapter.chapter_number : undefined
   );
+  const { verses, loading: versesLoading } = useBibleVerses(
+    isExpanded ? chapter.book_name : undefined,
+    isExpanded ? chapter.chapter_number : undefined,
+    selectedTranslation
+  );
+
+  const getVerseText = (verse: any) => {
+    switch (selectedTranslation.toLowerCase()) {
+      case 'niv': return verse.text_niv;
+      case 'nasb': return verse.text_nasb;
+      case 'kjv': return verse.text_kjv;
+      default: return verse.text_esv;
+    }
+  };
 
   return (
     <Card className="mb-4">
@@ -51,28 +68,64 @@ const BibleChapterWithVideos = ({ chapter }: BibleChapterWithVideosProps) => {
       </CardHeader>
       
       {isExpanded && (
-        <CardContent>
-          {loading ? (
-            <div className="space-y-3">
-              <div className="h-20 bg-muted rounded animate-pulse" />
-              <div className="h-20 bg-muted rounded animate-pulse" />
+        <CardContent className="space-y-6">
+          {/* Bible Verses Section */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold text-lg">
+                {chapter.book_name} {chapter.chapter_number} ({selectedTranslation})
+              </h3>
             </div>
-          ) : socialContent.length > 0 ? (
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground mb-3">
-                Related videos for {chapter.book_name} {chapter.chapter_number}:
-              </div>
-              <div className="grid gap-3">
-                {socialContent.map((item) => (
-                  <SocialMediaCard key={item.id} content={item} />
+            
+            {versesLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-4 bg-muted rounded animate-pulse" />
                 ))}
               </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No related content found for this chapter.
-            </p>
-          )}
+            ) : verses.length > 0 ? (
+              <div className="space-y-3 max-h-60 overflow-y-auto bg-muted/30 p-4 rounded-lg">
+                {verses.map((verse) => {
+                  const text = getVerseText(verse);
+                  return text ? (
+                    <p key={verse.id} className="text-sm leading-relaxed">
+                      <span className="font-semibold text-primary mr-2">
+                        {verse.verse_number}
+                      </span>
+                      {text}
+                    </p>
+                  ) : null;
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No verses found for this chapter.
+              </p>
+            )}
+          </div>
+
+          {/* Related Videos Section */}
+          <div>
+            <h3 className="font-semibold text-lg mb-3">Related Videos</h3>
+            {socialLoading ? (
+              <div className="grid gap-3 md:grid-cols-2">
+                {[1, 2].map((i) => (
+                  <div key={i} className="h-32 bg-muted rounded animate-pulse" />
+                ))}
+              </div>
+            ) : socialContent.length > 0 ? (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {socialContent.map((item) => (
+                  <SocialMediaCard key={item.id} content={item} compact />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No related videos found for this chapter.
+              </p>
+            )}
+          </div>
         </CardContent>
       )}
     </Card>

@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,9 +15,10 @@ interface SocialMediaContent {
 
 interface SocialMediaCardProps {
   content: SocialMediaContent;
+  compact?: boolean;
 }
 
-const SocialMediaCard = ({ content }: SocialMediaCardProps) => {
+const SocialMediaCard = ({ content, compact = false }: SocialMediaCardProps) => {
   const handleClick = () => {
     window.open(content.url, '_blank', 'noopener,noreferrer');
   };
@@ -30,7 +32,7 @@ const SocialMediaCard = ({ content }: SocialMediaCardProps) => {
 
   return (
     <Card className="transition-colors hover:bg-muted/50 cursor-pointer" onClick={handleClick}>
-      <CardHeader className="pb-3">
+      <CardHeader className={compact ? "pb-2" : "pb-3"}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {content.content_type === 'youtube' ? (
@@ -46,9 +48,9 @@ const SocialMediaCard = ({ content }: SocialMediaCardProps) => {
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className={compact ? "space-y-2" : "space-y-3"}>
         {content.content_type === 'youtube' && videoId && (
-          <div className="aspect-video w-full overflow-hidden rounded-md">
+          <div className={compact ? "aspect-video w-full overflow-hidden rounded-md" : "aspect-video w-full overflow-hidden rounded-md"}>
             <img 
               src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
               alt="Video thumbnail"
@@ -59,17 +61,17 @@ const SocialMediaCard = ({ content }: SocialMediaCardProps) => {
         )}
         
         <div>
-          <h4 className="font-medium text-sm leading-tight line-clamp-2 mb-1">
+          <h4 className={`font-medium leading-tight line-clamp-2 mb-1 ${compact ? 'text-xs' : 'text-sm'}`}>
             {content.title}
           </h4>
-          <p className="text-xs text-muted-foreground">
+          <p className={`text-muted-foreground ${compact ? 'text-xs' : 'text-xs'}`}>
             {content.author_handle}
           </p>
         </div>
 
         <Button 
           variant="outline" 
-          size="sm" 
+          size={compact ? "sm" : "sm"}
           className="w-full"
           onClick={(e) => {
             e.stopPropagation();

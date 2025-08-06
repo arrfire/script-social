@@ -5,11 +5,13 @@ import { useChaptersWithContent } from '@/hooks/useChaptersWithContent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BookOpen, Settings } from 'lucide-react';
+import { BookOpen, Settings, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import BibleChapterWithVideos from './BibleChapterWithVideos';
 
 const BibleReader = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [selectedTranslation, setSelectedTranslation] = useState('ESV');
   const { chapters, loading } = useChaptersWithContent();
 
@@ -36,13 +38,21 @@ const BibleReader = () => {
               </SelectContent>
             </Select>
             
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" size="sm" onClick={signOut}>
-              Sign Out
-            </Button>
+            {user ? (
+              <>
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={signOut}>
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
+                <User className="h-4 w-4 mr-2" />
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -53,6 +63,18 @@ const BibleReader = () => {
             <CardTitle className="text-2xl">Bible Chapters with Video Content</CardTitle>
             <p className="text-muted-foreground">
               Explore Bible chapters that have related video content. Click on any chapter to view the Bible text and related videos.
+              {!user && (
+                <span className="block mt-2 text-sm">
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-primary" 
+                    onClick={() => navigate('/auth')}
+                  >
+                    Sign in
+                  </Button>
+                  {" "}to save highlights, notes, and track your reading progress.
+                </span>
+              )}
             </p>
           </CardHeader>
         </Card>

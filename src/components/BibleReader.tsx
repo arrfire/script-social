@@ -62,7 +62,7 @@ const BibleReader = () => {
           <CardHeader>
             <CardTitle className="text-2xl">Bible Chapters with Video Content</CardTitle>
             <p className="text-muted-foreground">
-              Explore Bible chapters that have related video content. Click on any chapter to view the Bible text and related videos.
+              Explore Bible chapters that have related video content. Click "Show Chapter" to view the Bible text and related videos.
               {!user && (
                 <span className="block mt-2 text-sm">
                   <Button 
@@ -98,6 +98,7 @@ const BibleReader = () => {
                 bookName={chapter.book_name}
                 chapterNumber={chapter.chapter_number}
                 videoCount={chapter.video_count}
+                selectedTranslation={selectedTranslation}
               />
             ))}
           </div>

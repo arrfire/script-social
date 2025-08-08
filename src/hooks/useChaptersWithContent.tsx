@@ -24,7 +24,7 @@ const BIBLICAL_BOOK_ORDER: { [key: string]: number } = {
   'Romans': 42, 'Corinthians': 43, 'Galatians': 44, 'Ephesians': 45,
   'Philippians': 46, 'Colossians': 47, 'Thessalonians': 48, 'Timothy': 49,
   'Titus': 50, 'Philemon': 51, 'Hebrews': 52, 'James': 53, 'Peter': 54,
-  'John': 55, 'Jude': 56, 'Revelation': 57
+  'John Letters': 55, 'Jude': 56, 'Revelation': 57
 };
 
 export const useChaptersWithContent = () => {

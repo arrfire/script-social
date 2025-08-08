@@ -11,9 +11,14 @@ interface BibleVerse {
   text_kjv: string | null;
 }
 
+interface BibleVerseWithText extends BibleVerse {
+  text: string;
+}
+
 export const useBibleVerses = (bookName?: string, chapterNumber?: number, translation: string = 'ESV') => {
-  const [verses, setVerses] = useState<BibleVerse[]>([]);
+  const [verses, setVerses] = useState<BibleVerseWithText[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!bookName || !chapterNumber) {
@@ -23,6 +28,7 @@ export const useBibleVerses = (bookName?: string, chapterNumber?: number, transl
 
     const fetchVerses = async () => {
       setLoading(true);
+      setError(null);
       try {
         console.log(`Fetching verses for ${bookName} chapter ${chapterNumber}`);
         
@@ -35,11 +41,13 @@ export const useBibleVerses = (bookName?: string, chapterNumber?: number, transl
 
         if (bookError) {
           console.error('Error fetching book:', bookError);
+          setError('Error fetching book');
           return;
         }
 
         if (!book) {
           console.log(`Book not found: ${bookName}`);
+          setError('Book not found');
           return;
         }
 
@@ -55,11 +63,13 @@ export const useBibleVerses = (bookName?: string, chapterNumber?: number, transl
 
         if (chapterError) {
           console.error('Error fetching chapter:', chapterError);
+          setError('Error fetching chapter');
           return;
         }
 
         if (!chapter) {
           console.log(`Chapter not found: ${bookName} ${chapterNumber}`);
+          setError('Chapter not found');
           return;
         }
 
@@ -74,13 +84,22 @@ export const useBibleVerses = (bookName?: string, chapterNumber?: number, transl
 
         if (versesError) {
           console.error('Error fetching verses:', versesError);
+          setError('Error fetching verses');
           return;
         }
 
         console.log(`Found ${versesData?.length || 0} verses`);
-        setVerses(versesData || []);
+        
+        // Map verses to include the text property based on selected translation
+        const mappedVerses: BibleVerseWithText[] = (versesData || []).map(verse => ({
+          ...verse,
+          text: getTranslationText(verse, translation)
+        }));
+        
+        setVerses(mappedVerses);
       } catch (error) {
         console.error('Error fetching verses:', error);
+        setError('Error fetching verses');
       } finally {
         setLoading(false);
       }
@@ -89,5 +108,20 @@ export const useBibleVerses = (bookName?: string, chapterNumber?: number, transl
     fetchVerses();
   }, [bookName, chapterNumber, translation]);
 
-  return { verses, loading };
+  return { verses, loading, error };
+};
+
+const getTranslationText = (verse: BibleVerse, translation: string): string => {
+  switch (translation.toUpperCase()) {
+    case 'ESV':
+      return verse.text_esv || '';
+    case 'NIV':
+      return verse.text_niv || '';
+    case 'NASB':
+      return verse.text_nasb || '';
+    case 'KJV':
+      return verse.text_kjv || '';
+    default:
+      return verse.text_esv || '';
+  }
 };

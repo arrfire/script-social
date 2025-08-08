@@ -1,85 +1,112 @@
 
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Youtube, ExternalLink } from 'lucide-react';
-
-interface SocialMediaContent {
-  id: string;
-  content_type: 'youtube' | 'twitter';
-  url: string;
-  title: string;
-  author_handle: string;
-  reference_text: string;
-}
+import { ExternalLink, MessageCircle } from 'lucide-react';
 
 interface SocialMediaCardProps {
-  content: SocialMediaContent;
-  compact?: boolean;
+  content: {
+    id: string;
+    content_type: 'youtube' | 'twitter';
+    url: string;
+    title: string;
+    author_handle: string;
+    reference_text: string;
+  };
 }
 
-const SocialMediaCard = ({ content, compact = false }: SocialMediaCardProps) => {
-  const handleClick = () => {
-    window.open(content.url, '_blank', 'noopener,noreferrer');
-  };
+const SocialMediaCard: React.FC<SocialMediaCardProps> = ({ content }) => {
+  const renderYouTubeContent = () => {
+    const getYouTubeId = (url: string) => {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return match && match[2].length === 11 ? match[2] : null;
+    };
 
-  const getVideoId = (url: string) => {
-    const match = url.match(/(?:shorts\/|v=|embed\/|youtu\.be\/)([^&?\s]{11})/);
-    return match ? match[1] : null;
-  };
+    const videoId = getYouTubeId(content.url);
 
-  const videoId = content.content_type === 'youtube' ? getVideoId(content.url) : null;
-
-  return (
-    <Card className="transition-colors hover:bg-muted/50 cursor-pointer" onClick={handleClick}>
-      <CardHeader className={compact ? "pb-2" : "pb-3"}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {content.content_type === 'youtube' ? (
-              <Youtube className="h-4 w-4 text-destructive" />
-            ) : (
-              <div className="h-4 w-4 bg-primary rounded" />
-            )}
-            <Badge variant="secondary" className="text-xs">
-              {content.reference_text}
-            </Badge>
-          </div>
-          <ExternalLink className="h-3 w-3 text-muted-foreground" />
-        </div>
-      </CardHeader>
-      
-      <CardContent className={compact ? "space-y-2" : "space-y-3"}>
-        {content.content_type === 'youtube' && videoId && (
-          <div className={compact ? "aspect-video w-full overflow-hidden rounded-md" : "aspect-video w-full overflow-hidden rounded-md"}>
-            <img 
-              src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
-              alt="Video thumbnail"
-              className="h-full w-full object-cover"
-              loading="lazy"
+    return (
+      <div className="space-y-4">
+        {videoId && (
+          <div className="aspect-video w-full">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              title={content.title}
+              className="w-full h-full rounded-lg"
+              allowFullScreen
             />
           </div>
         )}
-        
-        <div>
-          <h4 className={`font-medium leading-tight line-clamp-2 mb-1 ${compact ? 'text-xs' : 'text-sm'}`}>
-            {content.title}
-          </h4>
-          <p className={`text-muted-foreground ${compact ? 'text-xs' : 'text-xs'}`}>
-            {content.author_handle}
-          </p>
+        <div className="flex items-center justify-between">
+          <Badge variant="secondary" className="flex items-center gap-1">
+            📺 YouTube
+          </Badge>
+          <a
+            href={content.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Watch
+          </a>
         </div>
+      </div>
+    );
+  };
 
-        <Button 
-          variant="outline" 
-          size={compact ? "sm" : "sm"}
-          className="w-full"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleClick();
-          }}
-        >
-          {content.content_type === 'youtube' ? 'Watch Video' : 'View Tweet'}
-        </Button>
+  const renderTwitterContent = () => {
+    const getTweetId = (url: string) => {
+      const match = url.match(/status\/(\d+)/);
+      return match ? match[1] : null;
+    };
+
+    const tweetId = getTweetId(content.url);
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-400">
+          <div className="flex items-start gap-3">
+            <MessageCircle className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
+            <div className="space-y-2 flex-1">
+              <p className="text-sm text-gray-800 leading-relaxed">
+                {content.title}
+              </p>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span>@{content.author_handle}</span>
+                <span>•</span>
+                <span>Twitter</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <Badge variant="secondary" className="flex items-center gap-1">
+            🐦 Twitter
+          </Badge>
+          <a
+            href={content.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View Tweet
+          </a>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-gray-600">
+          {content.reference_text}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {content.content_type === 'youtube' ? renderYouTubeContent() : renderTwitterContent()}
       </CardContent>
     </Card>
   );

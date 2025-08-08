@@ -95,8 +95,9 @@ const BibleReader = () => {
             {chapters.map((chapter, index) => (
               <BibleChapterWithVideos
                 key={`${chapter.book_name}-${chapter.chapter_number}`}
-                chapter={chapter}
-                selectedTranslation={selectedTranslation}
+                bookName={chapter.book_name}
+                chapterNumber={chapter.chapter_number}
+                videoCount={chapter.video_count}
               />
             ))}
           </div>
